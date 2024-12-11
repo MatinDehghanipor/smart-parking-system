@@ -10,11 +10,6 @@ module manage_parking(entry_sensor, exit_sensor, vacant_parking,
 	
 	reg inp;
 	
-	initial begin
-		parkings = 4'b0000;
-		
-	end
-	
 	assign inp = {entry_sensor, exit_sensor};
 	
 	always @ (posedge CLK) begin
@@ -116,7 +111,7 @@ module manage_parking(entry_sensor, exit_sensor, vacant_parking,
 					parkings = 4'b0011;
 				if (inp == 2'b01 & vacant_parking == 2'b01)
 					parkings = 4'b1001;
-				if (inp == 2'b01 & vacant_parking == 2'b00)
+			if (inp == 2'b01 & vacant_parking == 2'b00)
 					parkings = 4'b1010;
 				end	
 			4'b1100: 

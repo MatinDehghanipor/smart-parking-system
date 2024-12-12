@@ -159,6 +159,20 @@ module manage_parking(entry_sensor, exit_sensor, vacant_parking,
 					parkings = 4'b1110;
 				end						
 		endcase
+		// Alternative for case block above
+		// if (entry_senor & ~exit_sensor) begin
+			// parkings[3] = parkings[3] |  (parkings[0] & parkings[1] & parkings[2]);
+			// parkings[2] = parkings[2] | (parkings[0] & parkings[1]);
+			// parkings[1] = parkings[1] | parkings[2];
+			// parkings[0] = 1'b1;
+		// end
+
+		// if (~entry_sensor & exit_sensor) begin
+			// parkings[3] = parkings[3] & (~vacant_parking[0] | ~vacant_parking[1]);
+			// parkings[2] = parkings[2] & (~vacant_parking[0] | vacant_parking[1]);
+			// parkings[1] = parkings[1] & (vacant_parking[0] | ~vacant_parking[1]);
+			// parkings[0] = parkings[0] & (vacant_parking[0] | vacant_parking[1])
+		// end
 	end
 
 

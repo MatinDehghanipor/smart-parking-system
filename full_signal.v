@@ -11,6 +11,8 @@ module full_signal (in_signal, CLK, out_signal);
 
     reg [1:0] step;
 
+    // It should alternate only three times
+
     always @ (posedge CLK) begin
         if (step > 0) begin
             step = step - 1;

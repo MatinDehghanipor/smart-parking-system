@@ -48,7 +48,7 @@ module control_fsm (entry_sensor, exit_sensor, vacant_parking,
         case (state)
             IDLE : begin
 				timer = 16'b0000000000000000;
-                if (entery_sensor & ~exit_sensor)
+                if (entry_sensor & ~exit_sensor)
                     if (full) begin
                         state = FULL;
 						full_signal = 1'b1;
@@ -57,7 +57,7 @@ module control_fsm (entry_sensor, exit_sensor, vacant_parking,
                         state = DOOR_OPEN;
 						door_open_signal = 1'b1;
                     end
-                if (~entery_sensor & exit_sensor)
+                if (~entry_sensor & exit_sensor)
                     if (~empty) begin
                         state = DOOR_OPEN;
 						door_open_signal = 1'b1;
@@ -81,7 +81,7 @@ module control_fsm (entry_sensor, exit_sensor, vacant_parking,
 			end
 
             ASSIGN_PARKING : begin 
-				if (entry_senor & ~exit_sensor) begin
+				if (entry_sensor & ~exit_sensor) begin
 					parkings[3] = parkings[3] |  (parkings[0] & parkings[1] & parkings[2]);
 					parkings[2] = parkings[2] | (parkings[0] & parkings[1]);
 					parkings[1] = parkings[1] | parkings[2];

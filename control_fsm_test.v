@@ -17,7 +17,7 @@ module control_fsm_test();
 
     initial begin
         CLK = 1'b1;
-        repeat (100) // 50 milisecond. 
+        repeat (1000) // 500 milisecond. 
             #500 CLK = ~CLK;
     end
 
@@ -28,14 +28,72 @@ module control_fsm_test();
         RESET = 1'b1; #10
         RESET = 1'b0; #10
 
+        // first car enters
         entry_sensor = 1'b1;
         exit_sensor = 1'b0; #1500;
 
         entry_sensor = 1'b0;
+
+        #12000;
+        
+        // second car enters
+        entry_sensor = 1'b1;
+        exit_sensor = 1'b0; #1500;
+
+        entry_sensor = 1'b0;
+
+        #12000;
+        
+        // third car enters
+        entry_sensor = 1'b1;
+        exit_sensor = 1'b0; #1500;
+
+        entry_sensor = 1'b0;
+
+        #12000;
+
+        // forth car enters
+        entry_sensor = 1'b1;
+        exit_sensor = 1'b0; #1500;
+
+        entry_sensor = 1'b0;
+
+        #12000;
+
+        // another car can not enter
+        entry_sensor = 1'b1;
+        exit_sensor = 1'b0; #1500;
+
+        entry_sensor = 1'b0;
+
+        #12000;
+
+        // one car exits
+        entry_sensor = 1'b0;
+        exit_sensor = 1'b1;
+        vacant_parking = 2'b10; #1500
+
         exit_sensor = 1'b0;
 
+        #12000;
 
-        
+        // one car exits
+        entry_sensor = 1'b0;
+        exit_sensor = 1'b1;
+        vacant_parking = 2'b00; #1500
+
+        exit_sensor = 1'b0;
+
+        #12000;
+
+        // one car enters
+        entry_sensor = 1'b1;
+        exit_sensor = 1'b0; #1500
+
+        entry_sensor = 1'b0;
+
+        #12000;
+
 
     end
 

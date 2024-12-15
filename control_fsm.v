@@ -68,7 +68,7 @@ module control_fsm (entry_sensor, exit_sensor, vacant_parking,
 
                 DOOR_OPEN : begin
 			    	timer = timer + 1;
-				    if (timer > 10 /*IT MUST BE 10000*/) begin
+				    if (timer > 10 /*FOR TEST*/ /*IT MUST BE 10000*/) begin
 					    if (temp_state)
                             state = CAR_ENTERING;
                         else
@@ -79,7 +79,7 @@ module control_fsm (entry_sensor, exit_sensor, vacant_parking,
 
                 FULL : begin 
 				    timer = timer + 1;
-    				if (timer > 3 /*IT MUST BE 3000*/) begin
+    				if (timer > 3 /*FOR TEST*/ /*IT MUST BE 3000*/) begin
 	    				state = IDLE;
 		    			full_signal = 1'b0;
 			    	end

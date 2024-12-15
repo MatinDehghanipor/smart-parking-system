@@ -6,6 +6,6 @@ module door_open_signal_control(in_signal, CLK, out_signal);
     input in_signal, CLK;
     output out_signal;
 
-    assign out_signal = out_signal & CLK;
+    assign out_signal = in_signal & CLK;
 
 endmodule

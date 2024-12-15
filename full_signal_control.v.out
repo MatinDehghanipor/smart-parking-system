@@ -1,0 +1,30 @@
+#! /c/Source/iverilog-install/bin/vvp
+:ivl_version "12.0 (devel)" "(s20150603-1539-g2693dd32b)";
+:ivl_delay_selection "TYPICAL";
+:vpi_time_precision + 0;
+:vpi_module "C:\iverilog\lib\ivl\system.vpi";
+:vpi_module "C:\iverilog\lib\ivl\vhdl_sys.vpi";
+:vpi_module "C:\iverilog\lib\ivl\vhdl_textio.vpi";
+:vpi_module "C:\iverilog\lib\ivl\v2005_math.vpi";
+:vpi_module "C:\iverilog\lib\ivl\va_math.vpi";
+S_000002c85acf65f0 .scope module, "full_signal_control" "full_signal_control" 2 3;
+ .timescale 0 0;
+    .port_info 0 /INPUT 1 "in_signal";
+    .port_info 1 /INPUT 1 "CLK";
+    .port_info 2 /OUTPUT 1 "out_signal";
+o000002c85ad46f88 .functor BUFZ 1, C4<z>; HiZ drive
+o000002c85ad46ef8 .functor BUFZ 1, C4<z>; HiZ drive
+L_000002c85acf6f70 .functor AND 1, o000002c85ad46f88, o000002c85ad46ef8, C4<1>, C4<1>;
+L_000002c85acf6e10 .functor AND 1, L_000002c85acf6f70, L_000002c85acfdb90, C4<1>, C4<1>;
+v000002c85ad46e50_0 .net "CLK", 0 0, o000002c85ad46ef8;  0 drivers
+v000002c85acf6780_0 .net *"_ivl_0", 0 0, L_000002c85acf6f70;  1 drivers
+v000002c85acf6820_0 .net *"_ivl_3", 0 0, L_000002c85acfdb90;  1 drivers
+v000002c85acf68c0_0 .net "in_signal", 0 0, o000002c85ad46f88;  0 drivers
+v000002c85acf6960_0 .net "out_signal", 0 0, L_000002c85acf6e10;  1 drivers
+v000002c85acf6a00_0 .var "step", 3 0;
+L_000002c85acfdb90 .part v000002c85acf6a00_0, 3, 1;
+# The file index is used to find the file name in the following table.
+:file_names 3;
+    "N/A";
+    "<interactive>";
+    "full_signal_control.v";

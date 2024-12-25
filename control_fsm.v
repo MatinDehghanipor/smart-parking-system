@@ -59,7 +59,12 @@ module control_fsm (entry_sensor, exit_sensor, vacant_parking,
 	    					door_open_signal = 1'b1;
                         end
                     if (~entry_sensor & exit_sensor)
-                        if (~empty) begin
+                        // Exiting car must exist!
+                        if (~vacant_parking[0] & ~vacant_parking[1] & parkings[0] |
+                            ~vacant_parking[0] & vacant_parking[1] & parkings[1] |
+                            vacant_parking[0] & ~vacant_parking[1] & parkings[2] |
+                            vacant_parking[0] & vacant_parking[1] & parkings[3])
+                        begin
                             state = DOOR_OPEN;
                             temp_state = 1'b0; // Exiting
 						    door_open_signal = 1'b1;

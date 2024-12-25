@@ -18,7 +18,7 @@ module full_signal_control_test();
         $dumpfile("full_signal_control_test.vcd");
         $dumpvars(0, full_signal_control_test);
         in_signal = 1'b0;
-        #900
+        #800
         in_signal = 1'b1;
         #3000
         in_signal = 1'b0;

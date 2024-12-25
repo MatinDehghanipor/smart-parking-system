@@ -22,7 +22,4 @@ module full_signal_control (in_signal, CLK, out_signal);
             step = step + 1;
         end
     end
-
-
-
 endmodule

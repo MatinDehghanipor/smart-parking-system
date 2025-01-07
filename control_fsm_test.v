@@ -2,7 +2,6 @@
 `timescale 1us / 100ns
 
 module control_fsm_test();
-
     wire door_open_signal, full_signal;
 	wire [2:0] capacity;
 	wire [1:0] best_location;

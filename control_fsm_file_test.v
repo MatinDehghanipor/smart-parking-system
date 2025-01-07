@@ -23,7 +23,7 @@ module control_fsm_file_test();
 
     integer infile, outfile, scan_status;
     reg [3:0] inp;
-    reg d , f;
+    reg d ,f;
 
     initial begin
         $dumpfile("control_fsm_file_test.vcd");
@@ -49,7 +49,7 @@ module control_fsm_file_test();
             if (scan_status == 1) begin
                 entry_sensor = inp[3];
                 exit_sensor = inp[2];
-                vacant_parking = {inp[0], inp[1]};
+                vacant_parking = inp[1:0];
                 #1000;
                 if (entry_sensor)
                     entry_sensor = 1'b0;

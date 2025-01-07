@@ -1,5 +1,3 @@
-`timescale 1ns / 100ps
-
 // clock frequency : 1 KHz
 // RESET siganl is active high
 
@@ -20,19 +18,18 @@ module control_fsm (entry_sensor, exit_sensor, vacant_parking,
     reg [2:0] state;
     parameter IDLE = 3'b000 , DOOR_OPEN = 3'b001 , FULL = 3'b010 , CAR_ENTERING = 3'b011 , CAR_EXITING = 3'b100;
 
-    wire full, empty;
+    wire full;
     
     // 0 -> exiting
     // 1 -> entering
     reg temp_state;
 
     assign full = parkings[0] & parkings[1] & parkings[2] & parkings[3];
-	assign empty = ~(parkings[0] | parkings[1] | parkings[2] | parkings[3]);
 
     // The case in which parkings is equal to 1111 is considered as don't care
     assign best_location[1] = parkings[0] & parkings[1];
-    assign best_location[0] = (((~parkings[1]) & parkings[0]) |
-                                (parkings[2] & parkings[0]));
+    assign best_location[0] = ((~parkings[1]) & parkings[0]) |
+                                (parkings[2] & parkings[0]);
    		                      
     always @ (posedge CLK or posedge RESET) begin
         if (RESET) begin
@@ -43,8 +40,6 @@ module control_fsm (entry_sensor, exit_sensor, vacant_parking,
             full_signal = 1'b0;
         end 
         else begin
-            // timer <= timer;  // Default assignments to prevent latches
-            // state <= state;  // Default assignments to prevent latches
             case (state)
                 IDLE : begin
                     timer <= 16'b0000000000000000;
@@ -60,10 +55,10 @@ module control_fsm (entry_sensor, exit_sensor, vacant_parking,
                         end
                     if (~entry_sensor & exit_sensor)
                         // Exiting car must exist!
-                        if (~vacant_parking[0] & ~vacant_parking[1] & parkings[0] |
-                            ~vacant_parking[0] & vacant_parking[1] & parkings[1] |
-                            vacant_parking[0] & ~vacant_parking[1] & parkings[2] |
-                            vacant_parking[0] & vacant_parking[1] & parkings[3])
+                        if (~vacant_parking[1] & ~vacant_parking[0] & parkings[0] |
+                            ~vacant_parking[1] & vacant_parking[0] & parkings[1] |
+                            vacant_parking[1] & ~vacant_parking[0] & parkings[2] |
+                            vacant_parking[1] & vacant_parking[0] & parkings[3])
                         begin
                             state = DOOR_OPEN;
                             temp_state = 1'b0; // Exiting
@@ -91,7 +86,7 @@ module control_fsm (entry_sensor, exit_sensor, vacant_parking,
 			    end
 
                 CAR_ENTERING : begin 
-		    		parkings[3] = parkings[3] |  (parkings[0] & parkings[1] & parkings[2]);
+		    		parkings[3] = parkings[3] | (parkings[0] & parkings[1] & parkings[2]);
 			    	parkings[2] = parkings[2] | (parkings[0] & parkings[1]);
 				    parkings[1] = parkings[1] | parkings[0];
 					parkings[0] = 1'b1;
@@ -102,10 +97,10 @@ module control_fsm (entry_sensor, exit_sensor, vacant_parking,
 				end
 
                 CAR_EXITING: begin
-	    			parkings[3] = parkings[3] & (~vacant_parking[0] | ~vacant_parking[1]);
-		    		parkings[2] = parkings[2] & (~vacant_parking[0] | vacant_parking[1]);
-			    	parkings[1] = parkings[1] & (vacant_parking[0] | ~vacant_parking[1]);
-				    parkings[0] = parkings[0] & (vacant_parking[0] | vacant_parking[1]);
+	    			parkings[0] = parkings[0] & ~(~vacant_parking[1] & ~vacant_parking[0]);
+		    		parkings[1] = parkings[1] & ~(~vacant_parking[1] & vacant_parking[0]);
+			    	parkings[2] = parkings[2] & ~(vacant_parking[1] & ~vacant_parking[0]);
+				    parkings[3] = parkings[3] & ~(vacant_parking[1] & vacant_parking[0]);
 
                     capacity = capacity + 1;
 

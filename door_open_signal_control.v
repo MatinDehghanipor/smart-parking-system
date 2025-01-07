@@ -1,5 +1,3 @@
-`timescale 1ns / 100ps
-
 // clock frequency : 2Hz
 
 module door_open_signal_control(in_signal, CLK, out_signal);

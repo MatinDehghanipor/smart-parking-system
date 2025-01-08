@@ -1,4 +1,4 @@
-`include "full_signal_control.v"
+`include "../source/full_signal_control.v"
 `timescale 1us / 100ns
 
 module full_signal_control_test();

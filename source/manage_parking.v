@@ -6,6 +6,7 @@
 `include "door_open_signal_control.v"
 `include "binary_bcd.v"
 `include "bcd_seven_segment.v"
+`include "timer.v"
  
 module manage_parking(entry_sensor, exit_sensor, vacant_parking,
 				CLK , RESET,
@@ -17,9 +18,9 @@ module manage_parking(entry_sensor, exit_sensor, vacant_parking,
     output [3:0] selected_segment;
     output [7:0] slected_data; 
 
-    wire clk_1khz, clk_100hz, clk_2hz, clk_1hz;
+    wire clk_1khz, clk_250hz, clk_2hz, clk_1hz;
 
-    frequency_divider freq_divider (CLK, RESET, clk_1hz, clk_2hz, clk_100hz, clk_1khz);
+    frequency_divider freq_divider (CLK, RESET, clk_1hz, clk_2hz, clk_250hz, clk_1khz);
 
     wire deb_entry_sensor, deb_exit_sensor;
     wire [1:0] deb_vacant_parking;
@@ -38,13 +39,14 @@ module manage_parking(entry_sensor, exit_sensor, vacant_parking,
     // full_signal_control full_control (steady_full_signal, clk_1hz, full_signal);
     // door_open_signal_control door_open_control (steady_door_open_signal, clk_2hz, door_open_signal);
 	assign door_open_signal = steady_door_open_signal & clk_2hz;
-	assign full_signal = steady_full_signal & clk_1hz;
+	assign full_signal = steady_full_signal & clk_1hz; 
+
     wire [7:0] capacity_bcd;
     wire [7:0] best_location_bcd;
 
     binary_bcd conv1 ({4'b0000, capacity}, capacity_bcd);
     binary_bcd conv2 ({5'b00000, best_location}, best_location_bcd);
 
-    bcd_seven_segment conv3 ({capacity_bcd, best_location_bcd}, clk_100hz, RESET, selected_segment, slected_data); 
+    bcd_seven_segment conv3 ({capacity_bcd, best_location_bcd}, clk_250hz, RESET, selected_segment, slected_data); 
 
 endmodule

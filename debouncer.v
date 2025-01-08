@@ -1,8 +1,9 @@
 // clock frequency : 1 KHz
 `include "d_flip_flop.v"
 
-module debouncer(sig, CLK, deb_sig);
-    input sig, CLK;
+// clock frequency : 1 KHz
+module debouncer(CLK, sig, deb_sig);
+    input sig, CLK, RESET;
     output deb_sig;
     wire [2:0] Q;
     d_flip_flop d_ff1 (sig, CLK, Q[0]);

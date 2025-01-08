@@ -1,4 +1,4 @@
-// input clock frequency : 40MHz
+// input clock frequency : 40KHz
 
 module frequency_divider(clk_in, RESET, clk_1hz, clk_2hz, clk_100hz, clk_1khz);
     input clk_in, RESET;
@@ -32,16 +32,15 @@ module frequency_divider(clk_in, RESET, clk_1hz, clk_2hz, clk_100hz, clk_1khz);
             end
             cntr_2hz = cntr_2hz + 1;
 
-            if (cntr_100hz > 200000) begin
+            if (cntr_100hz > 10000) begin
                 clk_100hz = ~clk_100hz;
                 cntr_100hz = 0;
             end
-            cntr_100hz <= cntr_100hz + 1;
+            cntr_100hz = cntr_100hz + 1;
 
-            if (cntr_1khz > 20000) begin
-                clk_1hz = ~clk_1khz;
-                cntr_1khz = 0;
-                
+            if (cntr_1khz > 1000) begin
+                clk_1khz = ~clk_1khz;
+                cntr_1khz = 0;     
             end
             cntr_1khz = cntr_1khz + 1;
         end     

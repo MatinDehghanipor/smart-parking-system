@@ -1,5 +1,5 @@
+`timescale 1us / 100ns
 `include "manage_parking.v"
-`include 1ns / 100ps
 
 module manage_parking_test();
     reg entry_sensor, exit_sensor, CLK, RESET;
@@ -13,11 +13,16 @@ module manage_parking_test();
     manage_parking manager (entry_sensor, exit_sensor, vacant_parking,
 				CLK , RESET,
                 selected_segment, slected_data, parkings, door_open_signal, full_signal);
+
     initial begin
         CLK = 1'b0;
-        repeat (60)
-            repeat (1000000000)
-                #12.5 CLK = CLK = ~CLK;
+        repeat (300)
+            repeat (1000)
+                #12.5  CLK = ~CLK;
+    end
+
+    initial begin
+        $monitor("parkings : %b", parkings);
     end
 
     initial begin
@@ -25,8 +30,8 @@ module manage_parking_test();
         RESET = 1'b0; #10
 
         // first car enters
-        entry_sensor = 1'b1;
-        exit_sensor = 1'b0; #1500;
+        entry_sensor = 1'b1; 
+        exit_sensor = 1'b0; #4000;
 
         entry_sensor = 1'b0;
 
@@ -34,7 +39,7 @@ module manage_parking_test();
         
         // second car enters
         entry_sensor = 1'b1;
-        exit_sensor = 1'b0; #1500;
+        exit_sensor = 1'b0; #4000;
 
         entry_sensor = 1'b0;
 
@@ -42,7 +47,7 @@ module manage_parking_test();
         
         // third car enters
         entry_sensor = 1'b1;
-        exit_sensor = 1'b0; #1500;
+        exit_sensor = 1'b0; #4000;
 
         entry_sensor = 1'b0;
 
@@ -50,7 +55,7 @@ module manage_parking_test();
 
         // forth car enters
         entry_sensor = 1'b1;
-        exit_sensor = 1'b0; #1500;
+        exit_sensor = 1'b0; #4000;
 
         entry_sensor = 1'b0;
 
@@ -58,7 +63,7 @@ module manage_parking_test();
 
         // another car can not enter
         entry_sensor = 1'b1;
-        exit_sensor = 1'b0; #1500;
+        exit_sensor = 1'b0; #4000;
 
         entry_sensor = 1'b0;
 
@@ -67,7 +72,7 @@ module manage_parking_test();
         // one car exits
         entry_sensor = 1'b0;
         exit_sensor = 1'b1;
-        vacant_parking = 2'b10; #1500
+        vacant_parking = 2'b10; #4000;
 
         exit_sensor = 1'b0;
 
@@ -76,7 +81,7 @@ module manage_parking_test();
         // one car exits
         entry_sensor = 1'b0;
         exit_sensor = 1'b1;
-        vacant_parking = 2'b00; #1500
+        vacant_parking = 2'b00; #4000;
 
         exit_sensor = 1'b0;
 
@@ -84,11 +89,13 @@ module manage_parking_test();
 
         // one car enters
         entry_sensor = 1'b1;
-        exit_sensor = 1'b0; #1500
+        exit_sensor = 1'b0; #4000;
 
         entry_sensor = 1'b0;
 
         #12000;
+
+        $finish;
     end
 
 

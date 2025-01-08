@@ -15,15 +15,17 @@ module control_fsm_test();
 				capacity, best_location, parkings, door_open_signal, full_signal);
 
     initial begin
+        $monitor("parkings : %b", parkings);
+    end
+
+    initial begin
         CLK = 1'b1;
         repeat (1000) // 500 milisecond. 
             #500 CLK = ~CLK;
     end
 
-    initial begin
-        $dumpfile("control_fsm_test.vcd");
-        $dumpvars(0, control_fsm_test);
 
+    initial begin
         RESET = 1'b1; #10
         RESET = 1'b0; #10
 
@@ -93,6 +95,7 @@ module control_fsm_test();
 
         #12000;
 
+        $finish;
 
     end
 

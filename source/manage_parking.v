@@ -49,4 +49,5 @@ module manage_parking(entry_sensor, exit_sensor, vacant_parking,
 
     bcd_seven_segment conv3 ({capacity_bcd, best_location_bcd}, clk_250hz, RESET, selected_segment, slected_data); 
 
+
 endmodule

@@ -1,5 +1,5 @@
 // clock frequency : 100 Hz
-`include "digit_multiplever.v"
+`include "digit_multiplexer.v"
 
 module bcd_seven_segment(bcd_digits, CLK, RESET, selected_segment, slected_data);
     input [15:0] bcd_digits; 
@@ -9,9 +9,9 @@ module bcd_seven_segment(bcd_digits, CLK, RESET, selected_segment, slected_data)
 
     wire [3:0] selected_bcd;
 
-    digit_multiplever multiplexer(bcd_digits, CLK, RESET, selected_bcd, selected_segment);
+    digit_multiplexer multiplexer(bcd_digits, CLK, RESET, selected_bcd, selected_segment);
 
-    always @(selected_bcd)  begin
+    always @ (selected_bcd)  begin
         case (selected_bcd)
             4'b0000 : slected_data <= 8'b00111111;
             4'b0001 : slected_data <= 8'b00000110;

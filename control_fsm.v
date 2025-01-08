@@ -17,6 +17,8 @@ module control_fsm (entry_sensor, exit_sensor, vacant_parking,
 
     reg [2:0] state;
     parameter IDLE = 3'b000 , DOOR_OPEN = 3'b001 , FULL = 3'b010 , CAR_ENTERING = 3'b011 , CAR_EXITING = 3'b100;
+    parameter DOOR_OPEN_DELAY = 10000;
+    parameter FULL_DELAY = 3000;
 
     wire full;
     
@@ -68,7 +70,7 @@ module control_fsm (entry_sensor, exit_sensor, vacant_parking,
 
                 DOOR_OPEN : begin
 			    	timer = timer + 1;
-				    if (timer > 10 /*FOR TEST*/ /*IT MUST BE 10000*/) begin
+				    if (timer > DOOR_OPEN_DELAY) begin
 					    if (temp_state)
                             state = CAR_ENTERING;
                         else
@@ -79,7 +81,7 @@ module control_fsm (entry_sensor, exit_sensor, vacant_parking,
 
                 FULL : begin 
 				    timer = timer + 1;
-    				if (timer > 3 /*FOR TEST*/ /*IT MUST BE 3000*/) begin
+    				if (timer > FULL_DELAY) begin
 	    				state = IDLE;
 		    			full_signal = 1'b0;
 			    	end

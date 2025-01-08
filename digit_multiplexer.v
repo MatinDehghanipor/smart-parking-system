@@ -4,7 +4,7 @@ module digit_multiplexer(bcd_digits, CLK, RESET, selected_bcd, selected_segment)
     input [15:0] bcd_digits;
     input CLK, RESET;
     output reg [3:0] selected_bcd;
-    output reg selected_segment;
+    output reg [3:0] selected_segment;
 
     reg [1:0] counter;
 

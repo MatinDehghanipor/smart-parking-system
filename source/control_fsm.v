@@ -3,12 +3,13 @@
 
 module control_fsm (entry_sensor, exit_sensor, vacant_parking,
 				CLK , RESET,
-				dispaly, parkings, door_open_signal, full_signal);
+				left_dispaly, right_display, dispaly_mode,
+                parkings, door_open_signal, full_signal);
     
     input entry_sensor, exit_sensor, CLK, RESET;
 	input [1:0] vacant_parking;
 	output reg door_open_signal, full_signal;
-    output reg [15:0] dispaly;
+    output reg [6:0] left_dispaly, right_display;
 	output reg [3:0] parkings;
 
     reg [2:0] state;
@@ -20,11 +21,16 @@ module control_fsm (entry_sensor, exit_sensor, vacant_parking,
     parameter DOOR_OPEN_DELAY = 250;
     parameter FULL_DELAY = 500;
 
-    reg dispaly_mode;
+    output reg dispaly_mode;
+    reg [13:0] dispaly_timer;
     parameter DISPLAY_TIMER = 1'b0, DISPLAY_INFO = 1'b1;
+
+    reg [28:0] p0_timer, p1_timer, p2_timer, p3_timer;
+    reg p0_timer_enablbe, p1_timer_enable, p2_timer_enable, p3_timer_enable;
 
     reg [2:0] capacity;
 	wire [1:0] best_location;
+    reg [1:0] exiting_car;
 
     wire full;
     
@@ -46,12 +52,22 @@ module control_fsm (entry_sensor, exit_sensor, vacant_parking,
             capacity = 3'b100;
             door_open_signal = 1'b0;
             full_signal = 1'b0;
+            p0_timer = 0;
+            p1_timer = 0;
+            p2_timer = 0;
+            p3_timer = 0;
+            p0_timer_enable = 0;
+            p1_timer_enable = 0;
+            p2_timer_enable = 0;
+            p3_timer_enable = 0;
+            dispaly_timer = 0;
+            exiting_car = 0;
         end 
         else begin
             case (state)
                 IDLE : begin
-                    timer = 16'b0000000000000000;
-                    counter = 5'b00000;
+                    timer = 0;
+                    counter = 0;
                     if (entry_sensor & ~exit_sensor)
                         if (full) begin
                             state = FULL;
@@ -83,13 +99,30 @@ module control_fsm (entry_sensor, exit_sensor, vacant_parking,
                         door_open_signal = ~door_open_signal;
                     end
 				    if (counter > 38) begin
-					    if (temp_state)
+					    if (temp_state) begin
                             state = CAR_ENTERING;
-                        else
+                            case (best_location)
+                                2'b00 : p0_timer_enable = 1'b1;
+                                2'b01 : p1_timer_enable = 1'b1;
+                                2'b10 : p2_timer_enable = 1'b1;
+                                2'b11 : p3_timer_enable = 1'b1;
+                            endcase
+                        end
+                        else begin
                             state = CAR_EXITING;
+                            case (vacant_parking)
+                                2'b00 : p0_timer_enable = 1'b0;
+                                2'b01 : p1_timer_enable = 1'b0;
+                                2'b10 : p2_timer_enable = 1'b0;
+                                2'b11 : p3_timer_enable = 1'b0;
+                            endcase
+                            dispaly_mode = DISPLAY_TIMER;
+                            dispaly_timer = 0;
+                            exiting_car = vacant_parking;
+                        end
     					door_open_signal = 1'b0;
 	    			end
-		    	 end
+		    	end
 
                 FULL : begin
                     timer = timer + 1;
@@ -126,6 +159,49 @@ module control_fsm (entry_sensor, exit_sensor, vacant_parking,
                     state = IDLE;
 				end
             endcase
+            if (p0_timer_enable)    p0_timer = p0_timer + 1;
+            if (p1_timer_enable)    p1_timer = p1_timer + 1;
+            if (p2_timer_enable)    p2_timer = p2_timer + 1;
+            if (p3_timer_enable)    p3_timer = p3_timer + 1; 
+
+            if (dispaly_mode == DISPLAY_INFO) begin
+                if (capacity == 0)
+                   
+                else begin
+                    left_dispaly = {4'b0000, capacity};
+                    right_display = {5'b00000, best_location};
+                end
+            end
+            else if (dispaly_mode == DISPLAY_TIMER) begin
+                dispaly_timer = dispaly_timer + 1;
+                if (dispaly_timer > 15_000)
+                    dispaly_mode = DISPLAY_INFO;
+                    case (exiting_car)
+                        2'b00 : p0_timer = 0;
+                        2'b01 : p1_timer = 0;
+                        2'b10 : p2_timer = 0;
+                        2'b11 : p3_timer = 0;
+                    endcase
+                case (exiting_car)
+                    2'b00 : begin
+                        left_dispaly = p0_timer / 3600;
+                        right_display = (p0_timer % 3600) / 60;
+                    end
+                    2'b01 : begin
+                        left_dispaly = p1_timer / 3600;
+                        right_display = (p1_timer % 3600) / 60;
+                    end
+                    2'b10 : begin
+                        left_dispaly = p2_timer / 3600;
+                        right_display = (p2_timer % 3600) / 60;
+                    end
+                    2'b11 : begin
+                        left_dispaly = p3_timer / 3600;
+                        right_display = (p3_timer % 3600) / 60;
+                    end
+                endcase
+
+            end
         end
     end                            
 

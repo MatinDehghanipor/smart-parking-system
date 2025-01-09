@@ -3,22 +3,28 @@
 
 module control_fsm (entry_sensor, exit_sensor, vacant_parking,
 				CLK , RESET,
-				capacity, best_location, parkings, door_open_signal, full_signal);
+				dispaly, parkings, door_open_signal, full_signal);
     
     input entry_sensor, exit_sensor, CLK, RESET;
 	input [1:0] vacant_parking;
 	output reg door_open_signal, full_signal;
-	output reg [2:0] capacity;
-	output [1:0] best_location;
+    output reg [15:0] dispaly;
 	output reg [3:0] parkings;
-
-    // with 1KHz clock frequency we can count at most 63s 
-	reg [15:0] timer;
 
     reg [2:0] state;
     parameter IDLE = 3'b000 , DOOR_OPEN = 3'b001 , FULL = 3'b010 , CAR_ENTERING = 3'b011 , CAR_EXITING = 3'b100;
-    parameter DOOR_OPEN_DELAY = 10_000; // FOR TEST. IT MOST BE 10000
-    parameter FULL_DELAY = 3_000; // FOR TEST. IT MUST BE 3000
+
+    // with 1KHz clock frequency we can count at most 63s 
+	reg [15:0] timer;
+    reg [4:0] counter;
+    parameter DOOR_OPEN_DELAY = 250;
+    parameter FULL_DELAY = 500;
+
+    reg dispaly_mode;
+    parameter DISPLAY_TIMER = 1'b0, DISPLAY_INFO = 1'b1;
+
+    reg [2:0] capacity;
+	wire [1:0] best_location;
 
     wire full;
     
@@ -45,6 +51,7 @@ module control_fsm (entry_sensor, exit_sensor, vacant_parking,
             case (state)
                 IDLE : begin
                     timer = 16'b0000000000000000;
+                    counter = 5'b00000;
                     if (entry_sensor & ~exit_sensor)
                         if (full) begin
                             state = FULL;
@@ -70,7 +77,12 @@ module control_fsm (entry_sensor, exit_sensor, vacant_parking,
 
                 DOOR_OPEN : begin
 			    	timer = timer + 1;
-				    if (timer > DOOR_OPEN_DELAY) begin
+                    if (timer > DOOR_OPEN_DELAY) begin
+                        timer = 0;
+                        counter = counter + 1;
+                        door_open_signal = ~door_open_signal;
+                    end
+				    if (counter > 38) begin
 					    if (temp_state)
                             state = CAR_ENTERING;
                         else
@@ -79,9 +91,14 @@ module control_fsm (entry_sensor, exit_sensor, vacant_parking,
 	    			end
 		    	 end
 
-                FULL : begin 
-				    timer = timer + 1;
-    				if (timer > FULL_DELAY) begin
+                FULL : begin
+                    timer = timer + 1;
+                    if (timer > FULL_DELAY) begin
+                        timer = 0;
+                        counter = counter + 1;
+                        full_signal = ~full_signal;
+                    end
+    				if (counter > 4) begin
 	    				state = IDLE;
 		    			full_signal = 1'b0;
 			    	end

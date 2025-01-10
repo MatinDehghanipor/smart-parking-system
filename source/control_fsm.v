@@ -1,15 +1,16 @@
 // clock frequency : 1 KHz
 // RESET siganl is active high
+`include "hsm_timer.v"
 
 module control_fsm (entry_sensor, exit_sensor, vacant_parking,
 				CLK , RESET,
-				left_dispaly, right_display, dispaly_mode,
+				left_display, right_display, display_mode,
                 parkings, door_open_signal, full_signal);
     
     input entry_sensor, exit_sensor, CLK, RESET;
 	input [1:0] vacant_parking;
 	output reg door_open_signal, full_signal;
-    output reg [6:0] left_dispaly, right_display;
+    output reg [6:0] left_display, right_display;
 	output reg [3:0] parkings;
 
     reg [2:0] state;
@@ -21,12 +22,18 @@ module control_fsm (entry_sensor, exit_sensor, vacant_parking,
     parameter DOOR_OPEN_DELAY = 250;
     parameter FULL_DELAY = 500;
 
-    output reg dispaly_mode;
-    reg [13:0] dispaly_timer;
+    output reg display_mode;
+    reg [13:0] display_timer;
     parameter DISPLAY_TIMER = 1'b0, DISPLAY_INFO = 1'b1;
 
-    reg [28:0] p0_timer, p1_timer, p2_timer, p3_timer;
-    reg p0_timer_enablbe, p1_timer_enable, p2_timer_enable, p3_timer_enable;
+    reg p0_timer_enable, p1_timer_enable, p2_timer_enable, p3_timer_enable;
+    wire [6:0] p0_hours, p1_hours, p2_hours, p3_hours;
+    wire [6:0] p0_minutes, p1_minutes, p2_minutes, p3_minutes;
+    wire [6:0] p0_seconds, p1_seconds, p2_seconds, p3_seconds;
+    hsm_timer p0_timer (p0_timer_enable, CLK, RESET, p0_hours, p0_minutes, p0_seconds);
+    hsm_timer p1_timer (p1_timer_enable, CLK, RESET, p1_hours, p1_minutes, p1_seconds);
+    hsm_timer p2_timer (p2_timer_enable, CLK, RESET, p2_hours, p2_minutes, p2_seconds);
+    hsm_timer p3_timer (p3_timer_enable, CLK, RESET, p3_hours, p3_minutes, p3_seconds);
 
     reg [2:0] capacity;
 	wire [1:0] best_location;
@@ -52,15 +59,11 @@ module control_fsm (entry_sensor, exit_sensor, vacant_parking,
             capacity = 3'b100;
             door_open_signal = 1'b0;
             full_signal = 1'b0;
-            p0_timer = 0;
-            p1_timer = 0;
-            p2_timer = 0;
-            p3_timer = 0;
             p0_timer_enable = 0;
             p1_timer_enable = 0;
             p2_timer_enable = 0;
             p3_timer_enable = 0;
-            dispaly_timer = 0;
+            display_timer = 0;
             exiting_car = 0;
         end 
         else begin
@@ -88,6 +91,15 @@ module control_fsm (entry_sensor, exit_sensor, vacant_parking,
                             state = DOOR_OPEN;
                             temp_state = 1'b0; // Exiting
 						    door_open_signal = 1'b1;
+                            case (vacant_parking)
+                                2'b00 : p0_timer_enable = 1'b0;
+                                2'b01 : p1_timer_enable = 1'b0;
+                                2'b10 : p2_timer_enable = 1'b0;
+                                2'b11 : p3_timer_enable = 1'b0;
+                            endcase
+                            display_mode = DISPLAY_TIMER;
+                            display_timer = 0;
+                            exiting_car = vacant_parking;
                         end
                 end
 
@@ -110,15 +122,6 @@ module control_fsm (entry_sensor, exit_sensor, vacant_parking,
                         end
                         else begin
                             state = CAR_EXITING;
-                            case (vacant_parking)
-                                2'b00 : p0_timer_enable = 1'b0;
-                                2'b01 : p1_timer_enable = 1'b0;
-                                2'b10 : p2_timer_enable = 1'b0;
-                                2'b11 : p3_timer_enable = 1'b0;
-                            endcase
-                            dispaly_mode = DISPLAY_TIMER;
-                            dispaly_timer = 0;
-                            exiting_car = vacant_parking;
                         end
     					door_open_signal = 1'b0;
 	    			end
@@ -159,50 +162,41 @@ module control_fsm (entry_sensor, exit_sensor, vacant_parking,
                     state = IDLE;
 				end
             endcase
-            if (p0_timer_enable)    p0_timer = p0_timer + 1;
-            if (p1_timer_enable)    p1_timer = p1_timer + 1;
-            if (p2_timer_enable)    p2_timer = p2_timer + 1;
-            if (p3_timer_enable)    p3_timer = p3_timer + 1; 
-
-            if (dispaly_mode == DISPLAY_INFO) begin
+            
+            if (display_mode == DISPLAY_INFO) begin
                 if (capacity == 0)
-                   
+                   left_display = 0;
                 else begin
-                    left_dispaly = {4'b0000, capacity};
+                    left_display = {4'b0000, capacity};
                     right_display = {5'b00000, best_location};
                 end
             end
-            else if (dispaly_mode == DISPLAY_TIMER) begin
-                dispaly_timer = dispaly_timer + 1;
-                if (dispaly_timer > 15_000)
-                    dispaly_mode = DISPLAY_INFO;
+            else if (display_mode == DISPLAY_TIMER) begin 
+                if (display_timer < 15_000) begin
                     case (exiting_car)
-                        2'b00 : p0_timer = 0;
-                        2'b01 : p1_timer = 0;
-                        2'b10 : p2_timer = 0;
-                        2'b11 : p3_timer = 0;
+                        2'b00 : begin
+                            left_display = p0_hours;
+                            right_display = p0_minutes;
+                        end
+                        2'b01 : begin
+                            left_display = p1_hours;
+                            right_display = p1_minutes;
+                        end
+                        2'b10 : begin
+                            left_display = p2_hours;
+                            right_display = p2_minutes;
+                        end
+                        2'b11 : begin
+                            left_display = p3_hours;
+                            right_display = p3_minutes;
+                        end
                     endcase
-                case (exiting_car)
-                    2'b00 : begin
-                        left_dispaly = p0_timer / 3600;
-                        right_display = (p0_timer % 3600) / 60;
-                    end
-                    2'b01 : begin
-                        left_dispaly = p1_timer / 3600;
-                        right_display = (p1_timer % 3600) / 60;
-                    end
-                    2'b10 : begin
-                        left_dispaly = p2_timer / 3600;
-                        right_display = (p2_timer % 3600) / 60;
-                    end
-                    2'b11 : begin
-                        left_dispaly = p3_timer / 3600;
-                        right_display = (p3_timer % 3600) / 60;
-                    end
-                endcase
-
+                end
+                else begin
+                    display_mode = DISPLAY_INFO;
+                end
+                display_timer = display_timer + 1;
             end
         end
     end                            
-
 endmodule

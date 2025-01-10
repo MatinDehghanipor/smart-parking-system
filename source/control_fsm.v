@@ -64,6 +64,7 @@ module control_fsm (entry_sensor, exit_sensor, vacant_parking,
             p2_timer_enable = 0;
             p3_timer_enable = 0;
             display_timer = 0;
+            display_mode = DISPLAY_INFO;
             exiting_car = 0;
         end 
         else begin

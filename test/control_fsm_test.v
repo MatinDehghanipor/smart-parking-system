@@ -41,48 +41,7 @@ module control_fsm_test();
 
         entry_sensor = 1'b0;
 
-        #16_000_000;
-        
-        // second car enters
-        entry_sensor = 1'b1;
-        exit_sensor = 1'b0; #1500;
-
-        entry_sensor = 1'b0;
-
-        #16_000_000;
-        
-        // third car enters
-        entry_sensor = 1'b1;
-        exit_sensor = 1'b0; #1500;
-
-        entry_sensor = 1'b0;
-
-        #16_000_000;
-
-        // forth car enters
-        entry_sensor = 1'b1;
-        exit_sensor = 1'b0; #1500;
-
-        entry_sensor = 1'b0;
-
-        #16_000_000;
-
-        // another car can not enter
-        entry_sensor = 1'b1;
-        exit_sensor = 1'b0; #1500;
-
-        entry_sensor = 1'b0;
-
-        #16_000_000;
-
-        // one car exits
-        entry_sensor = 1'b0;
-        exit_sensor = 1'b1;
-        vacant_parking = 2'b10; #1500
-
-        exit_sensor = 1'b0;
-
-        #16_000_000;
+        #130_000_000;
 
         // one car exits
         entry_sensor = 1'b0;
@@ -93,13 +52,72 @@ module control_fsm_test();
 
         #16_000_000;
 
-        // one car enters
+        // second car enters
         entry_sensor = 1'b1;
-        exit_sensor = 1'b0; #1500
+        exit_sensor = 1'b0; #1500;
 
         entry_sensor = 1'b0;
 
+        #70_000_000;
+
+        // one car exits
+        entry_sensor = 1'b0;
+        exit_sensor = 1'b1;
+        vacant_parking = 2'b00; #1500
+
+        exit_sensor = 1'b0;
+
         #16_000_000;
+        
+        // // third car enters
+        // entry_sensor = 1'b1;
+        // exit_sensor = 1'b0; #1500;
+
+        // entry_sensor = 1'b0;
+
+        // #16_000_000;
+
+        // // forth car enters
+        // entry_sensor = 1'b1;
+        // exit_sensor = 1'b0; #1500;
+
+        // entry_sensor = 1'b0;
+
+        // #16_000_000;
+
+        // // another car can not enter
+        // entry_sensor = 1'b1;
+        // exit_sensor = 1'b0; #1500;
+
+        // entry_sensor = 1'b0;
+
+        // #16_000_000;
+
+        // // one car exits
+        // entry_sensor = 1'b0;
+        // exit_sensor = 1'b1;
+        // vacant_parking = 2'b10; #1500
+
+        // exit_sensor = 1'b0;
+
+        // #16_000_000;
+
+        // // one car exits
+        // entry_sensor = 1'b0;
+        // exit_sensor = 1'b1;
+        // vacant_parking = 2'b00; #1500
+
+        // exit_sensor = 1'b0;
+
+        // #16_000_000;
+
+        // // one car enters
+        // entry_sensor = 1'b1;
+        // exit_sensor = 1'b0; #1500
+
+        // entry_sensor = 1'b0;
+
+        // #16_000_000;
 
         $finish;
 

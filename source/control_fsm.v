@@ -1,6 +1,6 @@
 // clock frequency : 1 KHz
 // RESET siganl is active high
-`include "hsm_timer.v"
+`include "../source/hsm_timer.v"
 
 module control_fsm (entry_sensor, exit_sensor, vacant_parking,
 				CLK , RESET,
@@ -18,7 +18,7 @@ module control_fsm (entry_sensor, exit_sensor, vacant_parking,
 
     // with 1KHz clock frequency we can count at most 63s 
 	reg [15:0] timer;
-    reg [4:0] counter;
+    reg [5:0] counter;
     parameter DOOR_OPEN_DELAY = 250;
     parameter FULL_DELAY = 500;
 
@@ -124,6 +124,7 @@ module control_fsm (entry_sensor, exit_sensor, vacant_parking,
                             state = CAR_EXITING;
                         end
     					door_open_signal = 1'b0;
+                        timer = 0;
 	    			end
 		    	end
 
@@ -163,36 +164,38 @@ module control_fsm (entry_sensor, exit_sensor, vacant_parking,
 				end
             endcase
             
-            if (display_mode == DISPLAY_INFO) begin
-                left_binary = {4'b0000, capacity};
-                right_binary = {5'b00000, best_location};
-            end
-            else if (display_mode == DISPLAY_TIMER) begin 
-                if (display_timer < 15_000) begin
-                    case (exiting_car)
-                        2'b00 : begin
-                            left_binary = p0_hours;
-                            right_binary = p0_minutes;
-                        end
-                        2'b01 : begin
-                            left_binary = p1_hours;
-                            right_binary = p1_minutes;
-                        end
-                        2'b10 : begin
-                            left_binary = p2_hours;
-                            right_binary = p2_minutes;
-                        end
-                        2'b11 : begin
-                            left_binary = p3_hours;
-                            right_binary = p3_minutes;
-                        end
-                    endcase
+            case (display_mode)
+                DISPLAY_INFO : begin
+                    left_binary = {4'b0000, capacity};
+                    right_binary = {5'b00000, best_location};
                 end
-                else begin
-                    display_mode = DISPLAY_INFO;
+                DISPLAY_TIMER : begin 
+                    if (display_timer < 15_000) begin
+                        case (exiting_car)
+                            2'b00 : begin
+                                left_binary = p0_hours;
+                                right_binary = p0_minutes;
+                            end
+                            2'b01 : begin
+                                left_binary = p1_hours;
+                                right_binary = p1_minutes;
+                            end
+                            2'b10 : begin
+                                left_binary = p2_hours;
+                                right_binary = p2_minutes;
+                            end
+                            2'b11 : begin
+                                left_binary = p3_hours;
+                                right_binary = p3_minutes;
+                            end
+                        endcase
+                    end
+                    else begin
+                        display_mode = DISPLAY_INFO;
+                    end
+                    display_timer = display_timer + 1;
                 end
-                display_timer = display_timer + 1;
-            end
+            endcase
         end
     end                            
 endmodule

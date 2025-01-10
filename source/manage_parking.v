@@ -2,8 +2,6 @@
 `include "debouncer.v"
 `include "frequency_divider.v"
 `include "control_fsm.v"
-`include "full_signal_control.v"
-`include "door_open_signal_control.v"
 `include "binary_bcd.v"
 `include "bcd_seven_segment.v"
  

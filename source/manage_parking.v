@@ -6,7 +6,6 @@
 `include "door_open_signal_control.v"
 `include "binary_bcd.v"
 `include "bcd_seven_segment.v"
-`include "timer.v"
  
 module manage_parking(entry_sensor, exit_sensor, vacant_parking,
 				CLK , RESET,
@@ -28,25 +27,19 @@ module manage_parking(entry_sensor, exit_sensor, vacant_parking,
     debouncer deb1 (clk_1khz, entry_sensor, deb_entry_sensor);
     debouncer deb2 (clk_1khz, exit_sensor, deb_exit_sensor);
 
-    wire [2:0] capacity;
-    wire [1:0] best_location;
-    wire steady_door_open_signal, steady_full_signal;
+    wire [6:0] left_binary, right_binary;
+    wire display_mode;
 
     control_fsm fsm (deb_entry_sensor, deb_exit_sensor, vacant_parking,
 				clk_1khz , RESET,
-				capacity, best_location, parkings, steady_door_open_signal, steady_full_signal);
+				left_binary, right_binary, display_mode,
+                parkings, door_open_signal, full_signal);
 
-    // full_signal_control full_control (steady_full_signal, clk_1hz, full_signal);
-    // door_open_signal_control door_open_control (steady_door_open_signal, clk_2hz, door_open_signal);
-	assign door_open_signal = steady_door_open_signal & clk_2hz;
-	assign full_signal = steady_full_signal & clk_1hz; 
+    wire [7:0] left_bcd, right_bcd;
 
-    wire [7:0] capacity_bcd;
-    wire [7:0] best_location_bcd;
+    binary_bcd conv1 (left_binary, left_bcd);
+    binary_bcd conv2 (right_binary, right_bcd);
 
-    binary_bcd conv1 ({4'b0000, capacity}, capacity_bcd);
-    binary_bcd conv2 ({5'b00000, best_location}, best_location_bcd);
-
-    bcd_seven_segment conv3 ({capacity_bcd, best_location_bcd}, clk_250hz, RESET, selected_segment, slected_data); 
+    bcd_seven_segment conv3 ({left_bcd, right_bcd}, clk_250hz, RESET, selected_segment, slected_data); 
 
 endmodule

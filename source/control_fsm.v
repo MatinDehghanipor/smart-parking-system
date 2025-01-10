@@ -4,13 +4,13 @@
 
 module control_fsm (entry_sensor, exit_sensor, vacant_parking,
 				CLK , RESET,
-				left_display, right_display, display_mode,
+				left_binary, right_binary, display_mode,
                 parkings, door_open_signal, full_signal);
     
     input entry_sensor, exit_sensor, CLK, RESET;
 	input [1:0] vacant_parking;
 	output reg door_open_signal, full_signal;
-    output reg [6:0] left_display, right_display;
+    output reg [6:0] left_binary, right_binary;
 	output reg [3:0] parkings;
 
     reg [2:0] state;
@@ -164,31 +164,27 @@ module control_fsm (entry_sensor, exit_sensor, vacant_parking,
             endcase
             
             if (display_mode == DISPLAY_INFO) begin
-                if (capacity == 0)
-                   left_display = 0;
-                else begin
-                    left_display = {4'b0000, capacity};
-                    right_display = {5'b00000, best_location};
-                end
+                left_binary = {4'b0000, capacity};
+                right_binary = {5'b00000, best_location};
             end
             else if (display_mode == DISPLAY_TIMER) begin 
                 if (display_timer < 15_000) begin
                     case (exiting_car)
                         2'b00 : begin
-                            left_display = p0_hours;
-                            right_display = p0_minutes;
+                            left_binary = p0_hours;
+                            right_binary = p0_minutes;
                         end
                         2'b01 : begin
-                            left_display = p1_hours;
-                            right_display = p1_minutes;
+                            left_binary = p1_hours;
+                            right_binary = p1_minutes;
                         end
                         2'b10 : begin
-                            left_display = p2_hours;
-                            right_display = p2_minutes;
+                            left_binary = p2_hours;
+                            right_binary = p2_minutes;
                         end
                         2'b11 : begin
-                            left_display = p3_hours;
-                            right_display = p3_minutes;
+                            left_binary = p3_hours;
+                            right_binary = p3_minutes;
                         end
                     endcase
                 end

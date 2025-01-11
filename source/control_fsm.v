@@ -30,6 +30,9 @@ module control_fsm (entry_sensor, exit_sensor, vacant_parking,
     wire [6:0] p0_hours, p1_hours, p2_hours, p3_hours;
     wire [6:0] p0_minutes, p1_minutes, p2_minutes, p3_minutes;
     wire [6:0] p0_seconds, p1_seconds, p2_seconds, p3_seconds;
+    
+    // four timers for recording parking time
+    // we control enables of these timer in always block
     hsm_timer p0_timer (p0_timer_enable, CLK, RESET, p0_hours, p0_minutes, p0_seconds);
     hsm_timer p1_timer (p1_timer_enable, CLK, RESET, p1_hours, p1_minutes, p1_seconds);
     hsm_timer p2_timer (p2_timer_enable, CLK, RESET, p2_hours, p2_minutes, p2_seconds);
@@ -53,8 +56,9 @@ module control_fsm (entry_sensor, exit_sensor, vacant_parking,
                                 (parkings[2] & parkings[0]);
    		                      
     always @ (posedge CLK or posedge RESET) begin
+        // Initializing all regesters to default value
         if (RESET) begin
-            state = IDLE; // Initialize to IDLE
+            state = IDLE; // Initializing to IDLE
             parkings = 4'b0000;
             capacity = 3'b100;
             door_open_signal = 1'b0;
@@ -74,12 +78,12 @@ module control_fsm (entry_sensor, exit_sensor, vacant_parking,
                     counter = 0;
                     if (entry_sensor & ~exit_sensor)
                         if (full) begin
-                            state = FULL;
+                            state = FULL; // state change
     						full_signal = 1'b1;
     					end
                         else begin
-                            state = DOOR_OPEN;
-                            temp_state = 1'b1; // Entering
+                            state = DOOR_OPEN; // state change
+                            temp_state = 1'b1; // entering
 	    					door_open_signal = 1'b1;
                         end
                     if (~entry_sensor & exit_sensor)
@@ -89,17 +93,17 @@ module control_fsm (entry_sensor, exit_sensor, vacant_parking,
                             vacant_parking[1] & ~vacant_parking[0] & parkings[2] |
                             vacant_parking[1] & vacant_parking[0] & parkings[3])
                         begin
-                            state = DOOR_OPEN;
-                            temp_state = 1'b0; // Exiting
-						    door_open_signal = 1'b1;
-                            case (vacant_parking)
+                            state = DOOR_OPEN; // state change
+                            temp_state = 1'b0; // exiting
+						    door_open_signal = 1'b1; // turing door_open_signal on
+                            case (vacant_parking) // disabling exiting car's timer
                                 2'b00 : p0_timer_enable = 1'b0;
                                 2'b01 : p1_timer_enable = 1'b0;
                                 2'b10 : p2_timer_enable = 1'b0;
                                 2'b11 : p3_timer_enable = 1'b0;
                             endcase
-                            display_mode = DISPLAY_TIMER;
-                            display_timer = 0;
+                            display_mode = DISPLAY_TIMER; // we must show the time when a car is exiting
+                            // display_timer = 0;
                             exiting_car = vacant_parking;
                         end
                 end
@@ -109,12 +113,12 @@ module control_fsm (entry_sensor, exit_sensor, vacant_parking,
                     if (timer > DOOR_OPEN_DELAY) begin
                         timer = 0;
                         counter = counter + 1;
-                        door_open_signal = ~door_open_signal;
+                        door_open_signal = ~door_open_signal; // door_open_signal toggling
                     end
 				    if (counter > 38) begin
 					    if (temp_state) begin
-                            state = CAR_ENTERING;
-                            case (best_location)
+                            state = CAR_ENTERING; // state change
+                            case (best_location) // enabling entering car's timer. this discards previous saved time record 
                                 2'b00 : p0_timer_enable = 1'b1;
                                 2'b01 : p1_timer_enable = 1'b1;
                                 2'b10 : p2_timer_enable = 1'b1;
@@ -122,10 +126,10 @@ module control_fsm (entry_sensor, exit_sensor, vacant_parking,
                             endcase
                         end
                         else begin
-                            state = CAR_EXITING;
+                            state = CAR_EXITING; // state change
                         end
-    					door_open_signal = 1'b0;
-                        timer = 0;
+    					door_open_signal = 1'b0; // after 10 seconds door_open_signal must be turned off
+                        timer = 0; // reseting timer for next cars
 	    			end
 		    	end
 
@@ -134,14 +138,15 @@ module control_fsm (entry_sensor, exit_sensor, vacant_parking,
                     if (timer > FULL_DELAY) begin
                         timer = 0;
                         counter = counter + 1;
-                        full_signal = ~full_signal;
+                        full_signal = ~full_signal; // full_signal toggling
                     end
     				if (counter > 4) begin
-	    				state = IDLE;
-		    			full_signal = 1'b0;
+	    				state = IDLE; // state change
+		    			full_signal = 1'b0; // after 3 seconds full_signal must be turned off
 			    	end
 			    end
 
+                // in these two states we handle parkings when a car enters or exits
                 CAR_ENTERING : begin 
 		    		parkings[3] = parkings[3] | (parkings[0] & parkings[1] & parkings[2]);
 			    	parkings[2] = parkings[2] | (parkings[0] & parkings[1]);
@@ -150,7 +155,7 @@ module control_fsm (entry_sensor, exit_sensor, vacant_parking,
 
                     capacity = capacity - 1;
 
-                    state = IDLE;
+                    state = IDLE; // state change
 				end
 
                 CAR_EXITING: begin
@@ -161,10 +166,11 @@ module control_fsm (entry_sensor, exit_sensor, vacant_parking,
 
                     capacity = capacity + 1;
 
-                    state = IDLE;
+                    state = IDLE; // state change
 				end
             endcase
             
+            // in this case statement we handle displaying information and time with help of display_mode register
             case (display_mode)
                 DISPLAY_INFO : begin
                     left_binary = {4'b0000, capacity};
@@ -190,11 +196,13 @@ module control_fsm (entry_sensor, exit_sensor, vacant_parking,
                                 right_binary = p3_minutes;
                             end
                         endcase
+                        display_timer = display_timer + 1;
                     end
                     else begin
-                        display_mode = DISPLAY_INFO;
+                        display_mode = DISPLAY_INFO; // back to displaying information
+                        display_timer = 0; // reseting display_timer
                     end
-                    display_timer = display_timer + 1;
+                    // display_timer = display_timer + 1;
                 end
             endcase
         end

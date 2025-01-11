@@ -1,5 +1,5 @@
 // input clock : 1KHz
-
+// the timer retain its value until enabling for new record
 module hsm_timer (enable, CLK, RESET, hours, minutes, seconds);
 
     input enable, CLK, RESET;
@@ -23,7 +23,7 @@ module hsm_timer (enable, CLK, RESET, hours, minutes, seconds);
             seconds = 0;
             counter = 0;
         end
-        if (~enable) inner_enbale = 1'b0;
+        if (~enable)    inner_enbale = 1'b0;
         if (inner_enbale) begin
             if (counter > 999) begin
                 seconds = seconds + 1;

@@ -1,4 +1,4 @@
-// clock frequency : 100 Hz
+// clock frequency : 250 Hz
 
 module digit_multiplexer(bcd_digits, CLK, RESET, selected_bcd, selected_segment);
     input [15:0] bcd_digits;

@@ -103,7 +103,6 @@ module control_fsm (entry_sensor, exit_sensor, vacant_parking,
                                 2'b11 : p3_timer_enable = 1'b0;
                             endcase
                             display_mode = DISPLAY_TIMER; // we must show the time when a car is exiting
-                            // display_timer = 0;
                             exiting_car = vacant_parking;
                         end
                 end
@@ -202,7 +201,6 @@ module control_fsm (entry_sensor, exit_sensor, vacant_parking,
                         display_mode = DISPLAY_INFO; // back to displaying information
                         display_timer = 0; // reseting display_timer
                     end
-                    // display_timer = display_timer + 1;
                 end
             endcase
         end

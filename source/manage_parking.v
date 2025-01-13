@@ -18,12 +18,15 @@ module manage_parking(entry_sensor, exit_sensor, vacant_parking,
 
     wire clk_1khz, clk_250hz, clk_2hz, clk_1hz;
 
-    frequency_divider freq_divider (CLK, RESET, clk_1hz, clk_2hz, clk_250hz, clk_1khz);
+    frequency_divider freq_divider (CLK, RESET, clk_250hz, clk_1khz);
+
+    wire n_entry_sensor, n_exit_sensor;
+    not n1 (n_entry_sensor, entry_sensor);
+    not n2 (n_exit_sensor, exit_sensor);
 
     wire deb_entry_sensor, deb_exit_sensor;
-
-    debouncer deb1 (clk_1khz, entry_sensor, deb_entry_sensor);
-    debouncer deb2 (clk_1khz, exit_sensor, deb_exit_sensor);
+    debouncer deb1 (clk_1khz, n_entry_sensor, deb_entry_sensor);
+    debouncer deb2 (clk_1khz, n_exit_sensor, deb_exit_sensor);
 
     wire [6:0] left_binary, right_binary;
     wire display_mode;
